@@ -1,0 +1,2 @@
+energy_system.py:89:1: W293 blank line contains whitespace
+energy_system.py:89:5: W292 no newline at end of file
