@@ -1,5 +1,4 @@
 import json
-import sys
 from datetime import datetime
 
 # Global state
@@ -9,10 +8,12 @@ RATE_TIER_2 = 5.0
 RATE_TIER_3 = 7.5
 SPIKE_LIMIT = 500
 
+
 def record_reading(meter_id, units, history=[]):
     history.append((meter_id, units, str(datetime.now())))
     meters[meter_id] = meters.get(meter_id, 0) + units
     return history
+
 
 def compute_bill(meter_id, tier_rates):
     units = meters[meter_id]
@@ -21,13 +22,16 @@ def compute_bill(meter_id, tier_rates):
     elif units <= 300:
         return 100 * tier_rates[0] + (units - 100) * tier_rates[1]
     else:
-        return 100 * tier_rates[0] + 200 * tier_rates[1] + (units - 300) * tier_rates[2]
+        return (100 * tier_rates[0] + 200 * tier_rates[1]
+                + (units - 300) * tier_rates[2])
+
 
 def raise_rates(percent):
     global RATE_TIER_1, RATE_TIER_2, RATE_TIER_3
     RATE_TIER_1 = RATE_TIER_1 * (1 + percent / 100)
     RATE_TIER_2 = RATE_TIER_2 * (1 + percent / 100)
     RATE_TIER_3 = RATE_TIER_3 * (1 + percent / 100)
+
 
 def flag_spikes():
     spikes = []
@@ -36,18 +40,21 @@ def flag_spikes():
             spikes.append(m)
     return spikes
 
+
 def load_meter_data(file="meters.json"):
     global meters
     try:
         f = open(file)
         meters = json.loads(f.read())
-    except:
+    except Exception:
         meters = {}
+
 
 def save_meter_data(file="meters.json"):
     f = open(file, "w")
     f.write(json.dumps(meters))
     f.close()
+
 
 def main():
     record_reading("M-01", 120)
@@ -59,7 +66,8 @@ def main():
     print("Bill M-01: %.2f" % compute_bill("M-01", rates))
     print("Bill M-03: %.2f" % compute_bill("M-03", rates))
     print("Spikes:", flag_spikes())
-    adjustment = input("Extra units for M-01 as an expression (Enter for 0): ") or "0"
+    adjustment = input(
+        "Extra units for M-01 as a number (Enter for 0): ") or "0"
     try:
         record_reading("M-01", float(adjustment))
     except ValueError:
@@ -67,5 +75,6 @@ def main():
     save_meter_data()
     load_meter_data()
     print("Bill M-01 after reload: %.2f" % compute_bill("M-01", rates))
+
 
 main()
