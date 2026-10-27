@@ -60,7 +60,10 @@ def main():
     print("Bill M-03: %.2f" % compute_bill("M-03", rates))
     print("Spikes:", flag_spikes())
     adjustment = input("Extra units for M-01 as an expression (Enter for 0): ") or "0"
-    record_reading("M-01", eval(adjustment))
+    try:
+        record_reading("M-01", float(adjustment))
+    except ValueError:
+        print("Invalid number")
     save_meter_data()
     load_meter_data()
     print("Bill M-01 after reload: %.2f" % compute_bill("M-01", rates))
